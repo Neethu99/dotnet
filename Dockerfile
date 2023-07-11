@@ -1,28 +1,27 @@
-FROM maven:3.8.4-openjdk-8-slim AS maven_build
-
-# Set the working directory
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
 
-# Copy the Maven POM file
-COPY pom.xml .
+RUN apt-get update && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get -y install nodejs
 
-# Resolve Maven dependencies (this step can be cached if the pom.xml hasn't changed)
-RUN mvn dependency:go-offline
+COPY . ./
+RUN dotnet restore && \
+    dotnet build "dotnet6.csproj" -c Release && \
+    dotnet publish "dotnet6.csproj" -c Release -o publish
 
-# Copy the source code
-COPY src ./src
 
-# Build the application
-RUN mvn package -DskipTests
-
-# Create a final lightweight image
-FROM openjdk:8-jre-slim
-
-# Set the working directory
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
+COPY --from=build /app/publish .
 
-# Copy the built JAR file from the Maven build stage
-COPY --from=maven_build /app/target/sample-1.0.3.jar .
+ENV ASPNETCORE_URLS http://*:5000
 
-# Set the entry point to run the application
-CMD ["java", "-jar", "sample-1.0.3.jar"]
+RUN groupadd -r Nithuu && \
+    useradd -r -g Nithuu -s /bin/false Nithuu && \
+    chown -R Nithuu:Nithuu /app
+
+USER Nithuu 
+
+EXPOSE 5000
+ENTRYPOINT ["dotnet", "dotnet6."]
