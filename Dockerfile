@@ -24,4 +24,4 @@ RUN groupadd -r Nithuu && \
 USER Nithuu 
 
 EXPOSE 5000
-ENTRYPOINT ["dotnet", "dotnet6.dll"]
+ENTRYPOINT ["dotnet", "dotnet6.csproj"]
