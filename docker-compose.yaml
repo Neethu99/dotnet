@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "6000:5000"
+      - "5002:5000"
     environment:
       - ASPNETCORE_URLS=http://*:5000
     depends_on:
@@ -15,12 +15,12 @@ services:
   redis:
     image: redis
     ports:
-      - "7000:6379"
+      - "6379:6379"
 
   mysql:
     image: mysql:8.0
     ports:
-      - "3400:3306"
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=your_password
       - MYSQL_DATABASE=your_database
